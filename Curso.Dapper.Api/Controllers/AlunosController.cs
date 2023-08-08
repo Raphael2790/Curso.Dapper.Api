@@ -147,7 +147,32 @@ public class AlunosController : ControllerBase
         return CreatedAtRoute("BuscarAlunoPorId", new { id }, aluno);
     }
 
-    [HttpPost("cadastra-com-email-proprio",Name = "CadastrarAlunoComEmailProprio")]
+    // Inserção em lote
+    [HttpPost("cadastrar-em-lote", Name = "CadastrarAlunos")]
+    public async Task<IActionResult> PostListaAlunos([FromBody] List<Aluno> alunos)
+    {
+        using var connection = new SqlConnection(_connectionString);
+
+        connection.Open();
+
+        using var transaction = connection.BeginTransaction();
+
+        var sql = @"INSERT INTO Alunos (Nome, Email, DataNascimento, Ativo, DataCriacao) 
+                    VALUES (@Nome, @Email, @DataNascimento, 1, GETDATE());";
+
+        var linhasAfetadas = await connection.ExecuteAsync(sql, alunos, transaction);
+
+        if(linhasAfetadas is default(int))
+        {
+            transaction.Rollback();
+            return BadRequest(new { mensagem = "Não foi possível cadastrar os alunos" });
+        }
+
+        transaction.Commit();
+        return Ok();
+    }
+
+    [HttpPost("cadastrar-com-email-proprio",Name = "CadastrarAlunoComEmailProprio")]
     public async Task<IActionResult> PostComEmail([FromBody] Aluno aluno)
     {
         using var connection = new SqlConnection(_connectionString);
@@ -217,6 +242,31 @@ public class AlunosController : ControllerBase
         return NoContent();
     }
 
+    // Atualização em lote
+    [HttpPut("atualizar-em-lote", Name = "AtualizarAlunos")]
+    public async Task<IActionResult> PutListaAlunos([FromBody] List<Aluno> alunos)
+    {
+        using var connection = new SqlConnection(_connectionString);
+
+        connection.Open();
+
+        using var transaction = connection.BeginTransaction();
+
+        var sql = @"UPDATE Alunos SET Nome = @Nome, Email = @Email, DataNascimento = @DataNascimento
+                    WHERE Id = @Id";
+        var linhasAfetadas = await connection
+            .ExecuteAsync(sql, alunos, transaction);
+
+        if (linhasAfetadas == 0)
+        {
+            transaction.Rollback();
+            return BadRequest(new { mensagem = "Não foi possível atualizar os alunos" });
+        }
+
+        transaction.Commit();
+        return Ok();
+    }
+
     [HttpDelete("{id}", Name = "ExcluirAluno")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -226,6 +276,30 @@ public class AlunosController : ControllerBase
         if (linhasAfetadas == 0)
             return NotFound();
 
+        return NoContent();
+    }
+
+
+    [HttpDelete("deletar-em-lote", Name = "ExcluirAlunos")]
+    public async Task<IActionResult> DeletarListaAlunos([FromBody] List<Aluno> alunos)
+    {
+        using var connection = new SqlConnection(_connectionString);
+
+        connection.Open();
+
+        using var transaction = connection.BeginTransaction();
+
+        var sql = @"DELETE FROM Alunos WHERE Id = @Id";
+
+        var linhasAfetadas = await connection.ExecuteAsync(sql, alunos, transaction);
+
+        if (linhasAfetadas == 0)
+        {
+            transaction.Rollback();
+            return BadRequest(new { mensagem = "Não foi possível deletar os alunos" });
+        }
+
+        transaction.Commit();
         return NoContent();
     }
 
