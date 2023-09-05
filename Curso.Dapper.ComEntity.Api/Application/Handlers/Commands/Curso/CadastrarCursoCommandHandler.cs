@@ -2,33 +2,32 @@
 using Curso.Dapper.ComEntity.Api.Domain.Commands.Curso;
 using Curso.Dapper.ComEntity.Api.Domain.Services.Interfaces;
 
-namespace Curso.Dapper.ComEntity.Api.Application.Handlers.Commands.Curso
+namespace Curso.Dapper.ComEntity.Api.Application.Handlers.Commands.Curso;
+
+public class CadastrarCursoCommandHandler : ICommandHandler<CadastrarCursoCommand>
 {
-    public class CadastrarCursoCommandHandler : ICommandHandler<CadastrarCursoCommand>
+    private readonly ICursoDapperDomainService _cursoDapperDomainService;
+
+    public CadastrarCursoCommandHandler(ICursoDapperDomainService cursoDapperDomainService) 
+        => _cursoDapperDomainService = cursoDapperDomainService;
+
+    public async Task Handle(CadastrarCursoCommand command, CancellationToken cancellationToken)
     {
-        private readonly ICursoDapperDomainService _cursoDapperDomainService;
+        //Validacao do command
 
-        public CadastrarCursoCommandHandler(ICursoDapperDomainService cursoDapperDomainService) 
-            => _cursoDapperDomainService = cursoDapperDomainService;
-
-        public async Task Handle(CadastrarCursoCommand command, CancellationToken cancellationToken)
+        //Mapper para converter o command em entidade
+        var curso = new Domain.Entities.Curso
         {
-            //Validacao do command
+            Nome = command.Nome,
+            Descricao = command.Descricao,
+            Coordenador = command.Coordenador,
+            Professor = command.Professor,
+            TipoCurso = command.TipoCurso,
+            DataCriacao = DateTime.Now
+        };
 
-            //Mapper para converter o command em entidade
-            var curso = new Domain.Entities.Curso
-            {
-                Nome = command.Nome,
-                Descricao = command.Descricao,
-                Coordenador = command.Coordenador,
-                Professor = command.Professor,
-                TipoCurso = command.TipoCurso,
-                DataCriacao = DateTime.Now
-            };
+        //Validacao do curso
 
-            //Validacao do curso
-
-            await _cursoDapperDomainService.CadastrarCurso(curso);
-        }
+        await _cursoDapperDomainService.CadastrarCurso(curso);
     }
 }
