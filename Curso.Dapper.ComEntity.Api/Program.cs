@@ -31,8 +31,8 @@ builder.Services.AddScoped<CursoDapperContext>();
 builder.Services.AddMediatR(options =>
 {
     options.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-    options.AddOpenBehavior(typeof(UnitOfWorkBehavior<,>));
-    options.AddBehavior<IPipelineBehavior<RemoverCursoCommand, Unit>, UnitOfWorkRemoverCursoBehavior>();
+    //options.AddOpenBehavior(typeof(UnitOfWorkBehavior<,>));
+    //options.AddBehavior<IPipelineBehavior<RemoverCursoCommand, Unit>, UnitOfWorkRemoverCursoBehavior>();
 });
 
 builder.Services.AddScoped<ICursoRepository, CursoRepository>();

@@ -6,13 +6,9 @@ namespace Curso.Dapper.ComEntity.Api.Domain.Services;
 public sealed class CursoDapperDomainService : ICursoDapperDomainService
 {
     private readonly ICursoRepository _cursoRepository;
-    private readonly ILogger<CursoDapperDomainService> _logger;
 
-    public CursoDapperDomainService(ICursoRepository cursoRepository, ILogger<CursoDapperDomainService> logger)
-    {
-        _cursoRepository = cursoRepository;
-        _logger = logger;
-    }
+    public CursoDapperDomainService(ICursoRepository cursoRepository) 
+        => _cursoRepository = cursoRepository;
 
     public async Task AlterarCurso(Entities.Curso curso)
     {
@@ -34,19 +30,10 @@ public sealed class CursoDapperDomainService : ICursoDapperDomainService
 
     public async Task CadastrarCurso(Entities.Curso curso)
     {
-        try
-        {
-            //Logica de negócio
-            await _cursoRepository.Inserir(curso);
+        //Logica de negócio
+        await _cursoRepository.Inserir(curso);
 
-            //Alguma outra logica de negócio
-            _cursoRepository.UnitOfWork.Commit();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao cadastrar curso");
-            _cursoRepository.UnitOfWork.Rollback();
-        }
+        //Alguma outra logica de negócio
     }
 
     public async Task RemoverCurso(int id)
